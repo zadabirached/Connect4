@@ -69,7 +69,7 @@ static int read_column_choice(char player) {
             continue;
         }
         if (val < 1 || val > 7) {
-            printf("Out of range. Choose a column from 1 to 7.\n");
+            printf("Invalid input. Please enter a number from 1 to 7.\n");
             continue;
         }
         return (int)val;
