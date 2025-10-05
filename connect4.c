@@ -50,6 +50,7 @@ int is_draw(char board[ROWS][COLS]) {
 }
 
 int main() {
+    setvbuf(stdout, NULL, _IONBF, 0);
     char board[ROWS][COLS];
     for (int i = 0; i < ROWS; i++)
         for (int j = 0; j < COLS; j++) board[i][j] = '.';
