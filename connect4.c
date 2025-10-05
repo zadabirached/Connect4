@@ -6,23 +6,24 @@
 #define ROWS 6
 #define COLS 7
 
-void clear_screen(void) { printf("\033[2J\033[H"); }
+void clear_screen(void) { }
 
 void print_board(char board[ROWS][COLS]) {
-    clear_screen();
-    printf("\n   1 2 3 4 5 6 7\n");
+    puts("");
+    printf("  1 2 3 4 5 6 7\n");
     for (int i = 0; i < ROWS; i++) {
-        printf("   ");
+        printf("  ");
         for (int j = 0; j < COLS; j++) printf("%c ", board[i][j]);
-        printf("\n");
+        puts("");
     }
+    fflush(stdout);
 }
 
 int drop_checker(char board[ROWS][COLS], int col, char token) {
     for (int i = ROWS - 1; i >= 0; i--) {
         if (board[i][col] == '.') { board[i][col] = token; return 1; }
     }
-    return 0; // column full
+    return 0;
 }
 
 int check_direction(char board[ROWS][COLS], int r, int c, int dr, int dc, char token) {
@@ -56,31 +57,22 @@ static int read_column_choice(char player) {
     for (;;) {
         printf("\nPlayer %c, choose a column (1-7): ", player);
         if (!fgets(line, sizeof(line), stdin)) {
-            // EOF (Ctrl+D) or input error: gracefully exit the game loop
             return -1;
         }
-
-        // Strip trailing newline if any
         size_t len = strlen(line);
         if (len && line[len - 1] == '\n') line[len - 1] = '\0';
-
-        // Parse integer with strtol to detect junk properly
         errno = 0;
         char *endp = NULL;
         long val = strtol(line, &endp, 10);
-
-        // Check: at least one digit parsed, no errors, and no leftover junk
         if (endp == line || errno == ERANGE || *endp != '\0') {
             printf("Invalid input. Please enter a number from 1 to 7.\n");
             continue;
         }
-
         if (val < 1 || val > 7) {
             printf("Out of range. Choose a column from 1 to 7.\n");
             continue;
         }
-
-        return (int)val; // valid 1..7
+        return (int)val;
     }
 }
 
@@ -96,19 +88,15 @@ int main(void) {
 
     while (1) {
         print_board(board);
-
         int col = read_column_choice(player);
-        if (col == -1) { // EOF/quit
+        if (col == -1) {
             printf("\nGoodbye!\n");
             break;
         }
-
-        // Try to drop; if column is full, tell user and re-ask without switching player
         if (!drop_checker(board, col - 1, player)) {
             printf("Column %d is full. Pick a different column.\n", col);
             continue;
         }
-
         if (is_winner(board, player)) {
             print_board(board);
             printf("\nPlayer %c WINS!\n", player);
@@ -119,9 +107,7 @@ int main(void) {
             printf("\nGame is a DRAW.\n");
             break;
         }
-
         player = (player == 'A') ? 'B' : 'A';
     }
-
     return 0;
 }
