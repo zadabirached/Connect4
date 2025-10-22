@@ -37,9 +37,9 @@ int is_winner(char board[ROWS][COLS], char token) {
     for (int r = 0; r < ROWS; r++)
         for (int c = 0; c < COLS; c++)
             if (board[r][c] == token &&
-                (check_direction(board,r,c,0,1,token)   ||
-                 check_direction(board,r,c,1,0,token)   ||
-                 check_direction(board,r,c,1,1,token)   ||
+                (check_direction(board,r,c,0,1,token)||
+                 check_direction(board,r,c,1,0,token)||
+                 check_direction(board,r,c,1,1,token)||
                  check_direction(board,r,c,-1,1,token)))
                 return 1;
     return 0;
@@ -54,22 +54,22 @@ int read_column_choice(char player) {
     char line[128];
     for (;;) {
         printf("\nPlayer %c, choose a column (1-7): ", player);
-        if (!fgets(line, sizeof(line), stdin)) {
-            return -1;
-        }
+        if (!fgets(line, sizeof(line), stdin)) return -1;
         size_t len = strlen(line);
         if (len && line[len - 1] == '\n') line[len - 1] = '\0';
         errno = 0;
         char *endp = NULL;
         long val = strtol(line, &endp, 10);
-        if (endp == line || errno == ERANGE || *endp != '\0') {
-            printf("Invalid input. Please enter a number from 1 to 7.\n");
-            continue;
-        }
-        if (val < 1 || val > 7) {
-            printf("Invalid input. Please enter a number from 1 to 7.\n");
-            continue;
-        }
+        if (endp == line || errno == ERANGE || *endp != '\0') { printf("Invalid input. Please enter a number from 1 to 7.\n"); continue; }
+        if (val < 1 || val > 7) { printf("Invalid input. Please enter a number from 1 to 7.\n"); continue; }
         return (int)val;
     }
+}
+
+int bot_choose_random_col(char board[ROWS][COLS]) {
+    int candidates[COLS], n = 0;
+    for (int c = 0; c < COLS; c++) if (board[0][c] == '.') candidates[n++] = c;
+    if (n == 0) return -1;
+    int pick = rand() % n;
+    return candidates[pick] + 1;
 }
