@@ -20,10 +20,28 @@ static int read_mode_choice(void) {
     }
 }
 
+static int read_difficulty_choice(void) {
+    char line[64];
+    for (;;) {
+        printf("Choose bot difficulty: 1) Low (random)  2) Medium : ");
+        if (!fgets(line, sizeof(line), stdin)) return 1;
+        size_t len = strlen(line);
+        if (len && line[len - 1] == '\n') line[len - 1] = '\0';
+        errno = 0;
+        char *endp = NULL;
+        long v = strtol(line, &endp, 10);
+        if (endp == line || errno == ERANGE || *endp != '\0' || (v != 1 && v != 2)) { puts("Please enter 1 or 2."); continue; }
+        return (int)v;
+    }
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
     srand((unsigned)time(NULL));
+
     int mode = read_mode_choice();
+    int difficulty = 1;
+    if (mode == 2) difficulty = read_difficulty_choice();
 
     char board[ROWS][COLS];
     for (int i = 0; i < ROWS; i++) for (int j = 0; j < COLS; j++) board[i][j] = '.';
@@ -33,9 +51,10 @@ int main(void) {
         print_board(board);
         int col;
         if (mode == 2 && player == 'B') {
-            col = bot_choose_random_col(board);
+            if (difficulty == 1) col = bot_choose_random_col(board);
+            else col = bot_choose_medium_col(board, 'B', 'A');
             if (col == -1) { printf("\nGame is a DRAW.\n"); break; }
-            printf("\nBot chooses column %d\n", col);
+            printf("\nBot (B) chooses column %d\n", col);
         } else {
             col = read_column_choice(player);
             if (col == -1) { printf("\nGoodbye!\n"); break; }

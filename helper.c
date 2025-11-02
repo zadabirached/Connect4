@@ -66,10 +66,38 @@ int read_column_choice(char player) {
     }
 }
 
+static int first_free_row(char board[ROWS][COLS], int col0) {
+    for (int r = ROWS - 1; r >= 0; r--) if (board[r][col0] == '.') return r;
+    return -1;
+}
+
+static int wins_if_drop_here(char board[ROWS][COLS], int col0, char token) {
+    int r = first_free_row(board, col0);
+    if (r < 0) return 0;
+    board[r][col0] = token;
+    int ok = 0;
+    int dirs[4][2] = {{0,1},{1,0},{1,1},{-1,1}};
+    for (int d = 0; d < 4 && !ok; d++) {
+        int dr = dirs[d][0], dc = dirs[d][1];
+        for (int k = -3; k <= 0 && !ok; k++) {
+            int sr = r + k*dr, sc = col0 + k*dc;
+            if (check_direction(board, sr, sc, dr, dc, token)) ok = 1;
+        }
+    }
+    board[r][col0] = '.';
+    return ok;
+}
+
 int bot_choose_random_col(char board[ROWS][COLS]) {
     int candidates[COLS], n = 0;
     for (int c = 0; c < COLS; c++) if (board[0][c] == '.') candidates[n++] = c;
     if (n == 0) return -1;
     int pick = rand() % n;
     return candidates[pick] + 1;
+}
+
+int bot_choose_medium_col(char board[ROWS][COLS], char bot_token, char human_token) {
+    for (int c = 0; c < COLS; c++) if (board[0][c] == '.') if (wins_if_drop_here(board, c, bot_token)) return c + 1;
+    for (int c = 0; c < COLS; c++) if (board[0][c] == '.') if (wins_if_drop_here(board, c, human_token)) return c + 1;
+    return bot_choose_random_col(board);
 }
